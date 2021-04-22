@@ -1,3 +1,4 @@
+import { Provider } from '@ethersproject/providers';
 import { expect, use } from 'chai';
 import { MockProvider, solidity } from 'ethereum-waffle';
 import { ethers, Wallet } from 'ethers';
@@ -5,13 +6,36 @@ import { Token, TokenFactory } from '../build/types';
 
 use(solidity);
 
+type AvailableProviders = 'ganache' | 'moonbeam-local'
+
+const PROVIDER: AvailableProviders = 'moonbeam-local'
+const ALITH_PRIVATE_KEY = '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133';
+
+function getProvider () {
+  switch (PROVIDER) {
+    case 'ganache':
+      return new MockProvider()
+    case 'moonbeam-local':
+      return new ethers.providers.JsonRpcProvider('http://127.0.0.1:9933');
+  }
+}
+
+function getWallet (provider: Provider) {
+  switch (PROVIDER) {
+    case 'ganache':
+      return (provider as MockProvider).getWallets()[0]
+    case 'moonbeam-local':
+      return new Wallet(ALITH_PRIVATE_KEY).connect(provider);
+  }
+}
+
 describe('BasicToken', () => {
-  let provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:9933');
+  let provider = getProvider();
   let token: Token;
   let wallet: Wallet, walletTo: Wallet
 
   beforeEach(async () => {
-    wallet = new Wallet('0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133').connect(provider);
+    wallet = getWallet(provider);
     walletTo = Wallet.createRandom().connect(provider);
     token = await new TokenFactory(wallet).deploy();
     let contractTransaction = await token.initialize(1);
@@ -43,11 +67,13 @@ describe('BasicToken', () => {
       .to.be.reverted;
   });
 
+  // Can't verify mock interactions on local moonbeam node
   xit('Calls totalSupply on BasicToken contract', async () => {
     await token.totalSupply();
     expect('totalSupply').to.be.calledOnContract(token);
   });
 
+  // Can't verify mock interactions on local moonbeam node
   xit('Calls balanceOf with sender address on BasicToken contract', async () => {
     await token.balanceOf(wallet.address);
     expect('balanceOf').to.be.calledOnContractWith(token, [wallet.address]);

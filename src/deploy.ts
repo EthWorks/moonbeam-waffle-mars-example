@@ -1,7 +1,9 @@
 import { contract, createProxy, debug, deploy, runIf } from 'ethereum-mars'
 import { Market, Token, UpgradeabilityProxy } from '../build/artifacts'
 
-deploy({network: 'http://127.0.0.1:9933', privateKey: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'},(deployer) => {
+const ALITH_PRIVATE_KEY = '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133';
+
+deploy({network: 'http://127.0.0.1:9933', privateKey: ALITH_PRIVATE_KEY},(deployer) => {
   const appleImplementation = contract('apple', Token)
   const orangeImplementation = contract('orange', Token, { gasLimit: 1000000 })
   const proxy = createProxy(UpgradeabilityProxy, 'upgradeTo')

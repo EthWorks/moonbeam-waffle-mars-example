@@ -6,7 +6,7 @@
   "scripts": {
     "build": "waffle && mars",
     "test": "export NODE_ENV=test && mocha",
-    "start": "ts-node src/index.ts"
+    "deploy": "ts-node src/deploy.ts"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "^4.0.0",
